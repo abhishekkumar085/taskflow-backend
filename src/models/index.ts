@@ -1,5 +1,6 @@
 import Project from "./project.model";
 import ProjectMember from "./project_member.model";
+import RefreshToken from "./refreshToken.model";
 import Task from "./task.model";
 import User from "./user.model";
 
@@ -97,4 +98,14 @@ ProjectMember.belongsTo(Project, {
   as: "project",
 });
 
-export { User, Project, Task, ProjectMember };
+User.hasMany(RefreshToken, {
+  foreignKey: "user_id",
+  as: "refreshTokens",
+});
+
+RefreshToken.belongsTo(User, {
+  foreignKey: "user_id",
+  as: "user",
+});
+
+export { User, Project, Task, ProjectMember, RefreshToken };

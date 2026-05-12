@@ -1,10 +1,19 @@
 import { StatusCodes } from "http-status-codes";
 import ApiError from "../../utils/ApiError";
 import logger from "../../utils/logger";
-import { createUser, findUserByEmail } from "./auth.repository";
+import {
+  createRefreshToken,
+  createUser,
+  findUserByEmail,
+} from "./auth.repository";
 import { CreateUserInput, LoginUserInput } from "./auth.validation";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from "../../common/utils/token";
+import { RefreshToken } from "../../models";
 export const registerUser = async (payload: CreateUserInput) => {
   try {
     const existingUser = await findUserByEmail(payload.email);
@@ -30,21 +39,77 @@ export const loginUser = async (payload: LoginUserInput) => {
     if (!isMatch) {
       throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid email or password");
     }
-    const token = jwt.sign(
-      { id: user.id, role: user.role },
-      process.env.JWT_SECRET as string,
-      { expiresIn: "1h" },
-    );
+    const accessToken = generateAccessToken({
+      id: user.id,
+      role: user.role,
+    });
+
+    const refreshToken = generateRefreshToken({
+      id: user.id,
+      role: user.role,
+    });
+    await createRefreshToken({
+      user_id: user.id,
+      token: refreshToken,
+      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+    });
     const plainUser = user.toJSON();
 
     const { password, ...userResponse } = plainUser;
 
     return {
-      token,
+      accessToken,
+      refreshToken,
       user: userResponse,
     };
   } catch (error) {
     logger.error(`Error logging in user: ${error}`);
+    throw error;
+  }
+};
+
+export const refreshAccessToken = async (token: string) => {
+  try {
+    const existingToken = await RefreshToken.findOne({
+      where: {
+        token,
+        is_revoked: false,
+      },
+    });
+    if (!existingToken) {
+      throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid refresh token");
+    }
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_REFRESH_SECRET!,
+    ) as jwt.JwtPayload;
+
+    const accessToken = generateAccessToken({
+      id: decoded.id,
+      role: decoded.role,
+    });
+    return {
+      accessToken,
+    };
+  } catch (error) {
+    logger.error(`Error refreshing access token: ${error}`);
+    throw error;
+  }
+};
+
+export const logoutUser = async (token: string) => {
+  try {
+    const refreshToken = await RefreshToken.findOne({
+      where: { token },
+    });
+
+    if (!refreshToken) {
+      return;
+    }
+    refreshToken.is_revoked = true;
+    await refreshToken.save();
+  } catch (error) {
+    logger.error(`Error logging out user: ${error}`);
     throw error;
   }
 };

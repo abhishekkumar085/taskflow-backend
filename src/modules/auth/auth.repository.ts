@@ -1,4 +1,4 @@
-import { User } from "../../models";
+import { RefreshToken, User } from "../../models";
 import { CreateUserInput } from "./auth.validation";
 
 export const createUser = async (userData: CreateUserInput) => {
@@ -14,4 +14,14 @@ export const findUserByEmail = async (email: string) => {
 export const findUserById = async (id: string) => {
   const user = await User.findByPk(id);
   return user;
+};
+
+// *******************Refresh Token Repository*******************
+
+export const createRefreshToken = async (payload: {
+  user_id: string;
+  token: string;
+  expires_at: Date;
+}) => {
+  return RefreshToken.create(payload);
 };
