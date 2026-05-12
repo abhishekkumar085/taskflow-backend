@@ -10,14 +10,10 @@ import sequelize from "../config/database";
 
 class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare id: CreationOptional<string>;
-
   declare name: string;
-
   declare email: string;
-
   declare password: string;
-
-  declare role: "ADMIN" | "MEMBER";
+  declare role: CreationOptional<"ADMIN" | "MEMBER">;
 }
 
 User.init(
