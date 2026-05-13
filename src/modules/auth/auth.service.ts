@@ -14,6 +14,8 @@ import {
   generateRefreshToken,
 } from "../../common/utils/token";
 import { RefreshToken } from "../../models";
+import { deleteCache, getCache, setCache } from "../../common/utils/redis.util";
+import { CACHE_KEYS } from "../../common/constants/cache";
 export const registerUser = async (payload: CreateUserInput) => {
   try {
     const existingUser = await findUserByEmail(payload.email);
@@ -53,6 +55,12 @@ export const loginUser = async (payload: LoginUserInput) => {
       token: refreshToken,
       expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
     });
+    await setCache(
+      `${CACHE_KEYS.REFRESH_TOKEN}:${user.id}`,
+      refreshToken,
+      7 * 24 * 60 * 60, // 7 days in seconds
+    );
+
     const plainUser = user.toJSON();
 
     const { password, ...userResponse } = plainUser;
@@ -70,19 +78,28 @@ export const loginUser = async (payload: LoginUserInput) => {
 
 export const refreshAccessToken = async (token: string) => {
   try {
-    const existingToken = await RefreshToken.findOne({
-      where: {
-        token,
-        is_revoked: false,
-      },
-    });
-    if (!existingToken) {
-      throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid refresh token");
-    }
+    // const existingToken = await RefreshToken.findOne({
+    //   where: {
+    //     token,
+    //     is_revoked: false,
+    //   },
+    // });
+    // if (!existingToken) {
+    //   throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid refresh token");
+    // }
+
     const decoded = jwt.verify(
       token,
       process.env.JWT_REFRESH_SECRET!,
     ) as jwt.JwtPayload;
+
+    const storedToken = await getCache<string>(
+      `${CACHE_KEYS.REFRESH_TOKEN}:${decoded.id}`,
+    );
+
+    if (!storedToken || storedToken !== token) {
+      throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid refresh token");
+    }
 
     const accessToken = generateAccessToken({
       id: decoded.id,
@@ -99,15 +116,24 @@ export const refreshAccessToken = async (token: string) => {
 
 export const logoutUser = async (token: string) => {
   try {
-    const refreshToken = await RefreshToken.findOne({
-      where: { token },
-    });
+    // const refreshToken = await RefreshToken.findOne({
+    //   where: { token },
+    // });
 
-    if (!refreshToken) {
-      return;
+    // if (!refreshToken) {
+    //   return;
+    // }
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_REFRESH_SECRET!,
+    ) as jwt.JwtPayload;
+    const storedToken = await getCache<string>(
+      `${CACHE_KEYS.REFRESH_TOKEN}:${decoded.id}`,
+    );
+    if (!storedToken || storedToken !== token) {
+      throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid refresh token");
     }
-    refreshToken.is_revoked = true;
-    await refreshToken.save();
+    await deleteCache(`${CACHE_KEYS.REFRESH_TOKEN}:${decoded.id}`);
   } catch (error) {
     logger.error(`Error logging out user: ${error}`);
     throw error;
