@@ -12,7 +12,6 @@ const stream = {
 app.use(morgan("dev", { stream }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(errorMiddleware);
 
 app.use("/api/v1/auth", authRoutes);
 
@@ -22,5 +21,7 @@ app.get("/ping", (req, res) => {
     message: "Server is up and running!",
   });
 });
+
+app.use(errorMiddleware);
 
 export default app;

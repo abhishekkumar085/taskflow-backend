@@ -1,6 +1,27 @@
+// import { Request, Response, NextFunction } from "express";
+// import ApiError from "../utils/ApiError";
+// import logger from "../utils/logger";
+
+// const errorMiddleware = (
+//   err: ApiError,
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   logger.error(err.message);
+
+//   return res.status(err.statusCode || 500).json({
+//     success: false,
+//     message: err.message || "Internal Server Error",
+//   });
+// };
+
+// export default errorMiddleware;
+
 import { Request, Response, NextFunction } from "express";
 import ApiError from "../utils/ApiError";
 import logger from "../utils/logger";
+import { StatusCodes } from "http-status-codes";
 
 const errorMiddleware = (
   err: ApiError,
@@ -8,11 +29,29 @@ const errorMiddleware = (
   res: Response,
   next: NextFunction,
 ) => {
-  logger.error(err.message);
+  logger.error(err);
+  if (err instanceof ApiError) {
+    return res.status(err.statusCode).json({
+      success: false,
+      message: err.message,
+    });
+  }
 
-  return res.status(err.statusCode || 500).json({
+  if (
+    typeof err === "object" &&
+    err !== null &&
+    "name" in err &&
+    (err as { name: string }).name === "SequelizeDatabaseError"
+  ) {
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      success: false,
+      message: (err as unknown as { message: string }).message,
+    });
+  }
+
+  return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
     success: false,
-    message: err.message || "Internal Server Error",
+    message: "Internal Server Error",
   });
 };
 

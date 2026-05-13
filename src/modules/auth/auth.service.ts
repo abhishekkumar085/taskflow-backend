@@ -5,6 +5,7 @@ import {
   createRefreshToken,
   createUser,
   findUserByEmail,
+  findUserById,
 } from "./auth.repository";
 import { CreateUserInput, LoginUserInput } from "./auth.validation";
 import bcrypt from "bcrypt";
@@ -136,6 +137,21 @@ export const logoutUser = async (token: string) => {
     await deleteCache(`${CACHE_KEYS.REFRESH_TOKEN}:${decoded.id}`);
   } catch (error) {
     logger.error(`Error logging out user: ${error}`);
+    throw error;
+  }
+};
+
+export const getUserProfile = async (userId: string) => {
+  try {
+    const user = await findUserById(userId);
+    if (!user) {
+      throw new ApiError(StatusCodes.NOT_FOUND, "User not found");
+    }
+    const plainUser = user.toJSON();
+    const { password, ...userResponse } = plainUser;
+    return userResponse;
+  } catch (error: any) {
+    logger.error(`Error fetching user profile: ${error.message}`);
     throw error;
   }
 };

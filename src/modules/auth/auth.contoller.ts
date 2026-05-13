@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import ApiResponse from "../../utils/ApiResponse";
 import catchAsync from "../../utils/catchAsync";
 import {
+  getUserProfile,
   loginUser,
   logoutUser,
   refreshAccessToken,
@@ -46,4 +47,17 @@ export const logout = catchAsync(async (req: Request, res: Response) => {
   return res
     .status(StatusCodes.OK)
     .json(new ApiResponse(StatusCodes.OK, "Logged out successfully", {}));
+});
+
+export const UserProfile = catchAsync(async (req: Request, res: Response) => {
+  const user = await getUserProfile(req.params.userId as string);
+  return res
+    .status(StatusCodes.OK)
+    .json(
+      new ApiResponse(
+        StatusCodes.OK,
+        "User profile fetched successfully",
+        user,
+      ),
+    );
 });
