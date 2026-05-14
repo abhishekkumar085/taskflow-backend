@@ -5,6 +5,7 @@ import logger from "./utils/logger";
 import errorMiddleware from "./middlewares/error.middleware";
 import { authRoutes } from "./modules/auth";
 import { projectRoutes } from "./modules/project";
+import { taskRoutes } from "./modules/task";
 
 const app = express();
 const stream = {
@@ -16,6 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/projects", projectRoutes);
+app.use("/api/v1/tasks", taskRoutes);
 
 app.get("/ping", (req, res) => {
   res.status(StatusCodes.OK).json({

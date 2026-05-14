@@ -14,9 +14,9 @@ class Task extends Model<InferAttributes<Task>, InferCreationAttributes<Task>> {
 
   declare description: string | null;
 
-  declare status: "TODO" | "IN_PROGRESS" | "DONE";
+  declare status: CreationOptional<"TODO" | "IN_PROGRESS" | "DONE">;
 
-  declare priority: "LOW" | "MEDIUM" | "HIGH";
+  declare priority: CreationOptional<"LOW" | "MEDIUM" | "HIGH">;
 
   declare due_date: Date | null;
 
@@ -24,6 +24,7 @@ class Task extends Model<InferAttributes<Task>, InferCreationAttributes<Task>> {
 
   declare assigned_to: string | null;
 
+  declare assigned_by: string | null;
   declare created_by: string;
 
   declare created_at: CreationOptional<Date>;
@@ -75,20 +76,24 @@ Task.init(
       type: DataTypes.UUID,
     },
 
+    assigned_by: {
+      type: DataTypes.UUID,
+    },
     created_by: {
       type: DataTypes.UUID,
-
       allowNull: false,
     },
 
     created_at: {
       type: DataTypes.DATE,
       allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
 
     updated_at: {
       type: DataTypes.DATE,
       allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
   },
 

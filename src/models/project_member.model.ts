@@ -8,15 +8,11 @@ import {
 
 import sequelize from "../config/database";
 
-
-
 class ProjectMember extends Model<
   InferAttributes<ProjectMember>,
   InferCreationAttributes<ProjectMember>
 > {
-
-  declare id:
-    CreationOptional<string>;
+  declare id: CreationOptional<string>;
 
   declare project_id: string;
 
@@ -24,29 +20,21 @@ class ProjectMember extends Model<
 
   declare role_id: string;
 
-  declare added_by:
-    CreationOptional<string>;
+  declare added_by: CreationOptional<string>;
 
-  declare joined_at:
-    CreationOptional<Date>;
+  declare joined_at: CreationOptional<Date>;
 
-  declare created_at:
-    CreationOptional<Date>;
+  declare created_at: CreationOptional<Date>;
 
-  declare updated_at:
-    CreationOptional<Date>;
+  declare updated_at: CreationOptional<Date>;
 }
-
-
 
 ProjectMember.init(
   {
-
     id: {
       type: DataTypes.UUID,
 
-      defaultValue:
-        DataTypes.UUIDV4,
+      defaultValue: DataTypes.UUIDV4,
 
       primaryKey: true,
     },
@@ -68,16 +56,17 @@ ProjectMember.init(
     },
     joined_at: {
       type: DataTypes.DATE,
-      defaultValue:
-        DataTypes.NOW,
+      defaultValue: DataTypes.NOW,
     },
     created_at: {
       type: DataTypes.DATE,
       allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
     updated_at: {
       type: DataTypes.DATE,
       allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
   },
   {
@@ -85,7 +74,7 @@ ProjectMember.init(
     tableName: "project_members",
     underscored: true,
     timestamps: true,
-  }
+  },
 );
 
 export default ProjectMember;

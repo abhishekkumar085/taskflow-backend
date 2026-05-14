@@ -55,12 +55,20 @@ User.hasMany(Task, {
   foreignKey: "created_by",
   as: "createdTasks",
 });
+User.hasMany(Task, {
+  foreignKey: "assigned_by",
+  as: "delegatedTasks",
+});
 
 Task.belongsTo(User, {
   foreignKey: "created_by",
   as: "creator",
 });
 
+Task.belongsTo(User, {
+  foreignKey: "assigned_by",
+  as: "assigner",
+});
 // =========================
 // USER ↔ PROJECT (Members)
 // =========================
