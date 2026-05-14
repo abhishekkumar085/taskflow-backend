@@ -108,4 +108,12 @@ RefreshToken.belongsTo(User, {
   as: "user",
 });
 
+User.hasMany(Role, {
+  foreignKey: "created_by",
+});
+
+Role.belongsTo(User, {
+  foreignKey: "created_by",
+});
+
 export { User, Project, Task, ProjectMember, RefreshToken };

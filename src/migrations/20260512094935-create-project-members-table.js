@@ -1,90 +1,75 @@
 'use strict';
 
-/** @type {import('sequelize-cli').Migration} */
 module.exports = {
 
   async up(queryInterface, Sequelize) {
-
     await queryInterface.createTable(
       'project_members',
       {
-
         id: {
           type: Sequelize.UUID,
-
-          defaultValue: Sequelize.literal(
-            'gen_random_uuid()'
-          ),
-
+          defaultValue:
+            Sequelize.literal(
+              'gen_random_uuid()'
+            ),
           allowNull: false,
-
           primaryKey: true,
         },
-
         project_id: {
           type: Sequelize.UUID,
-
           allowNull: false,
-
           references: {
             model: 'projects',
             key: 'id',
           },
-
-          onUpdate: 'CASCADE',
-
           onDelete: 'CASCADE',
         },
-
         user_id: {
           type: Sequelize.UUID,
-
           allowNull: false,
-
           references: {
             model: 'users',
             key: 'id',
           },
-
-          onUpdate: 'CASCADE',
-
           onDelete: 'CASCADE',
         },
-
-        role: {
-          type: Sequelize.ENUM(
-            'OWNER',
-            'MEMBER'
-          ),
-
-          defaultValue: 'MEMBER',
+        role_id: {
+          type: Sequelize.UUID,
+          allowNull: false,
+          references: {
+            model: 'roles',
+            key: 'id',
+          },
+          onDelete: 'RESTRICT',
         },
-
+        added_by: {
+          type: Sequelize.UUID,
+          allowNull: true,
+          references: {
+            model: 'users',
+            key: 'id',
+          },
+          onDelete: 'SET NULL',
+        },
         joined_at: {
           type: Sequelize.DATE,
-
+          allowNull: false,
           defaultValue:
             Sequelize.literal(
               'CURRENT_TIMESTAMP'
             ),
         },
-
         created_at: {
-          allowNull: false,
-
           type: Sequelize.DATE,
-
+          allowNull: false,
           defaultValue:
             Sequelize.literal(
               'CURRENT_TIMESTAMP'
             ),
         },
-
         updated_at: {
-          allowNull: false,
-
           type: Sequelize.DATE,
-
+          allowNull: false,
           defaultValue:
             Sequelize.literal(
               'CURRENT_TIMESTAMP'
@@ -93,7 +78,11 @@ module.exports = {
       }
     );
 
-    // Prevent duplicate members
+
+    // =========================
+    // UNIQUE CONSTRAINT
+    // =========================
+
     await queryInterface.addConstraint(
       'project_members',
       {
@@ -101,15 +90,17 @@ module.exports = {
           'project_id',
           'user_id',
         ],
-
         type: 'unique',
-
         name:
-          'unique_project_member',
+          'unique_project_user',
       }
     );
 
-    // Indexes
+
+    // =========================
+    // INDEXES
+    // =========================
+
     await queryInterface.addIndex(
       'project_members',
       ['project_id']
@@ -119,16 +110,19 @@ module.exports = {
       'project_members',
       ['user_id']
     );
+
+    await queryInterface.addIndex(
+      'project_members',
+      ['role_id']
+    );
   },
 
-  async down(queryInterface, Sequelize) {
+
+
+  async down(queryInterface) {
 
     await queryInterface.dropTable(
       'project_members'
     );
-
-    await queryInterface.sequelize.query(
-      'DROP TYPE IF EXISTS "enum_project_members_role";'
-    );
-  }
+  },
 };
