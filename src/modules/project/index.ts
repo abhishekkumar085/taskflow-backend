@@ -1,1 +1,3 @@
-console.log("INDEX FOR PROJECT")
+import projectRoutes from "./project.routes";
+
+export { projectRoutes };

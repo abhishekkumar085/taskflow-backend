@@ -1,6 +1,7 @@
 import Project from "./project.model";
 import ProjectMember from "./project_member.model";
 import RefreshToken from "./refreshToken.model";
+import Role from "./role.model";
 import Task from "./task.model";
 import User from "./user.model";
 

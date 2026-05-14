@@ -50,8 +50,6 @@ ProjectMember.init(
 
       primaryKey: true,
     },
-
-
     project_id: {
       type: DataTypes.UUID,
       allowNull: false,
