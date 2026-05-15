@@ -1,5 +1,6 @@
 import { RefreshToken, User } from "../../models";
-import { CreateUserInput } from "./auth.validation";
+import Role from "../../models/role.model";
+import { createRoleInput, CreateUserInput } from "./auth.validation";
 
 export const createUser = async (userData: CreateUserInput) => {
   const response = await User.create(userData);
@@ -16,6 +17,13 @@ export const findUserById = async (id: string) => {
   return user;
 };
 
+export const findAllUserRepository = async () => {
+  const users = await User.findAll({
+    attributes: { exclude: ["password"] },
+  });
+  return users;
+};
+
 // *******************Refresh Token Repository*******************
 
 export const createRefreshToken = async (payload: {
@@ -24,4 +32,12 @@ export const createRefreshToken = async (payload: {
   expires_at: Date;
 }) => {
   return RefreshToken.create(payload);
+};
+
+// ********************Roles Repository*****************************
+export const createRoleRepository = async (payload: createRoleInput) => {
+  return Role.create(payload);
+};
+export const findAllRoleRepository = async () => {
+  return Role.findAll();
 };

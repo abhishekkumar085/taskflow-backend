@@ -3,11 +3,18 @@ import ApiError from "../../utils/ApiError";
 import logger from "../../utils/logger";
 import {
   createRefreshToken,
+  createRoleRepository,
   createUser,
+  findAllRoleRepository,
+  findAllUserRepository,
   findUserByEmail,
   findUserById,
 } from "./auth.repository";
-import { CreateUserInput, LoginUserInput } from "./auth.validation";
+import {
+  createRoleInput,
+  CreateUserInput,
+  LoginUserInput,
+} from "./auth.validation";
 import bcrypt from "bcrypt";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import {
@@ -154,4 +161,22 @@ export const getUserProfile = async (userId: string) => {
     logger.error(`Error fetching user profile: ${error.message}`);
     throw error;
   }
+};
+
+export const findAllUserService = async () => {
+  return findAllUserRepository();
+};
+
+export const createRoleService = async (
+  payload: createRoleInput,
+  userId: string,
+) => {
+  return createRoleRepository({
+    ...payload,
+    created_by: userId,
+  });
+};
+
+export const findAllRoleService = async () => {
+  return findAllRoleRepository();
 };

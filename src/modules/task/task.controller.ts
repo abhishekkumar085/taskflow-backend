@@ -1,14 +1,17 @@
 import { Request, Response } from "express";
 import catchAsync from "../../utils/catchAsync";
 import {
+  assignTaskService,
   createTaskService,
   deleteTaskService,
+  getMyTasksService,
   getProjectTasksService,
   updateTaskService,
   updateTaskStatusService,
 } from "./task.service";
 import { StatusCodes } from "http-status-codes";
 import ApiResponse from "../../utils/ApiResponse";
+import ApiError from "../../utils/ApiError";
 
 export const createTask = catchAsync(async (req: Request, res: Response) => {
   const task = await createTaskService(req.body, req.user?.id!);
@@ -33,7 +36,7 @@ export const getProjectTasks = catchAsync(
 
 export const getMyTasks = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user?.id!;
-  const tasks = await getProjectTasksService(userId);
+  const tasks = await getMyTasksService(userId);
   return res
     .status(StatusCodes.OK)
     .json(new ApiResponse(StatusCodes.OK, "Tasks fetched successfully", tasks));
@@ -76,4 +79,18 @@ export const deleteTask = catchAsync(async (req: Request, res: Response) => {
   return res
     .status(StatusCodes.OK)
     .json(new ApiResponse(StatusCodes.OK, "Task deleted successfully", null));
+});
+export const assignTask = catchAsync(async (req: Request, res: Response) => {
+  const taskId = Array.isArray(req.params.taskId)
+    ? req.params.taskId[0]
+    : req.params.taskId;
+  const assignedTo = req.body.assigned_to;
+  const userId = req.user?.id;
+
+  if (!userId) throw new ApiError(StatusCodes.UNAUTHORIZED, "Access Denied!");
+
+  const task = await assignTaskService(taskId, assignedTo, userId);
+  return res
+    .status(StatusCodes.OK)
+    .json(new ApiResponse(StatusCodes.OK, "Task assigned successfully", task));
 });

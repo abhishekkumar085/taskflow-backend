@@ -18,13 +18,14 @@ export const canManageTasks = async (
     include: [
       {
         model: Role,
+        as: "role",
       },
     ],
   });
   if (!member) {
     throw new ApiError(StatusCodes.FORBIDDEN, "Access denied");
   }
-  const roleName = (member as any).Role.name;
+  const roleName = (member as any).role?.name;
   const allowedRoles = ["Manager", "Team Lead"];
   if (!allowedRoles.includes(roleName)) {
     throw new ApiError(
@@ -54,6 +55,51 @@ export const canUpdateTaskStatus = async (
     throw new ApiError(
       StatusCodes.FORBIDDEN,
       "You can only update your own tasks",
+    );
+  }
+
+  next();
+};
+
+export const canAssignTask = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const taskId = Array.isArray(req.params.taskId)
+    ? req.params.taskId[0]
+    : req.params.taskId;
+  const task = await Task.findByPk(taskId);
+  if (!task) {
+    throw new ApiError(StatusCodes.NOT_FOUND, "Task not found");
+  }
+
+  const member = await ProjectMember.findOne({
+    where: {
+      project_id: task.project_id,
+      user_id: req.user?.id,
+    },
+
+    include: [
+      {
+        model: Role,
+        as: "role",
+      },
+    ],
+  });
+
+  if (!member) {
+    throw new ApiError(StatusCodes.FORBIDDEN, "Access denied");
+  }
+
+  const roleName = (member as any).role?.name;
+
+  const allowedRoles = ["Manager", "Team Lead"];
+
+  if (!allowedRoles.includes(roleName)) {
+    throw new ApiError(
+      StatusCodes.FORBIDDEN,
+      "Only Manager or Team Lead can assign tasks",
     );
   }
 

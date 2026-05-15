@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  assignTask,
   createTask,
   deleteTask,
   getMyTasks,
@@ -14,7 +15,11 @@ import {
   updateTaskSchema,
   updateTaskStatusSchema,
 } from "./task.validation";
-import { canManageTasks, canUpdateTaskStatus } from "./task.middleware";
+import {
+  canAssignTask,
+  canManageTasks,
+  canUpdateTaskStatus,
+} from "./task.middleware";
 
 const router = Router();
 
@@ -43,5 +48,7 @@ router.patch(
 );
 
 router.delete("/:taskId/delete", authMiddleware, canManageTasks, deleteTask);
+
+router.patch("/:taskId/assign", authMiddleware, canAssignTask, assignTask);
 
 export default router;

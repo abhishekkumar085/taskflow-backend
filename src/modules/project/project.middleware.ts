@@ -22,6 +22,7 @@ export const canManageProjectMembers = async (
       {
         model: Role,
         as: "role",
+        required: true,
       },
     ],
   });
@@ -29,7 +30,7 @@ export const canManageProjectMembers = async (
   if (!member) {
     throw new ApiError(StatusCodes.FORBIDDEN, "Access denied");
   }
-  const roleName = (member as any).Role.name;
+  const roleName = (member as any).role?.name;
   if (roleName !== "Manager") {
     throw new ApiError(StatusCodes.FORBIDDEN, "Only Manager can add members");
   }

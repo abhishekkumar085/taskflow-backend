@@ -2,6 +2,9 @@ import { StatusCodes } from "http-status-codes";
 import ApiResponse from "../../utils/ApiResponse";
 import catchAsync from "../../utils/catchAsync";
 import {
+  createRoleService,
+  findAllRoleService,
+  findAllUserService,
   getUserProfile,
   loginUser,
   logoutUser,
@@ -59,5 +62,30 @@ export const UserProfile = catchAsync(async (req: Request, res: Response) => {
         "User profile fetched successfully",
         user,
       ),
+    );
+});
+
+export const findAllUser = catchAsync(async (req: Request, res: Response) => {
+  const users = await findAllUserService();
+  return res
+    .status(StatusCodes.OK)
+    .json(new ApiResponse(StatusCodes.OK, "Users fetched successfully", users));
+});
+
+export const createRole = catchAsync(async (req: Request, res: Response) => {
+  const role = await createRoleService(req.body, req.user?.id as string);
+  return res
+    .status(StatusCodes.CREATED)
+    .json(
+      new ApiResponse(StatusCodes.CREATED, "Role created Successfully!", role),
+    );
+});
+
+export const findAllRole = catchAsync(async (req: Request, res: Response) => {
+  const roles = await findAllRoleService();
+  return res
+    .status(StatusCodes.OK)
+    .json(
+      new ApiResponse(StatusCodes.OK, "Roles fetched Successfully!", roles),
     );
 });

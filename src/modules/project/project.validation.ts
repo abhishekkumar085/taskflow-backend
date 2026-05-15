@@ -9,7 +9,6 @@ export type CreateProjectInput = z.infer<typeof createProjectSchema>;
 
 export const addProjectMemberSchema = z.object({
   user_id: z.uuid(),
-
   role_id: z.uuid(),
 });
 

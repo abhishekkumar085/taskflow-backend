@@ -19,5 +19,12 @@ export const loginUserSchema = z.object({
     .max(20, "Password too long"),
 });
 
+export const createRoleSchema = z.object({
+  name: z.string().trim().min(1, "Name is required"),
+  description: z.string().optional(),
+  created_by: z.string().optional(),
+});
+
 export type CreateUserInput = z.infer<typeof createUserSchema>;
 export type LoginUserInput = z.infer<typeof loginUserSchema>;
+export type createRoleInput = z.infer<typeof createRoleSchema>;
