@@ -106,7 +106,16 @@ ProjectMember.belongsTo(Project, {
   foreignKey: "project_id",
   as: "project",
 });
+// Projectmember Role
 
+Role.hasMany(ProjectMember, {
+  foreignKey: "role_id",
+});
+
+ProjectMember.belongsTo(Role, {
+  foreignKey: "role_id",
+  as: "role",
+});
 User.hasMany(RefreshToken, {
   foreignKey: "user_id",
   as: "refreshTokens",
